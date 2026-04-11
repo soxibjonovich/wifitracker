@@ -1,0 +1,15 @@
+[project]
+name = "wifitracker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pytest>=9.0.3",
+    "rich>=14.3.4",
+    "tplinkrouterc6u>=5.18.0",
+    "typer>=0.24.1",
+]
+
+[project.scripts]
+wifitracker = "wifitracker.main:app"
