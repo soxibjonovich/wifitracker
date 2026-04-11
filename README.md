@@ -1,6 +1,6 @@
 # WifiTracker
 
-A CLI tool for managing your TP-Link Archer C24 router — monitor connected devices, trust/block them, and run a background daemon on Raspberry Pi.
+A CLI tool for managing your TP-Link Wifi routers — monitor connected devices, trust/block them, and run a background daemon on Raspberry Pi.
 
 ---
 
