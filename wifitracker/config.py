@@ -7,7 +7,7 @@ DATA_DIR: Path = Path.home() / ".wifitracker"
 SETUP_FILE: Path = DATA_DIR / "setup.json"
 BLOCKED_FILE: Path = DATA_DIR / "blocked_devices.json"
 TRUSTED_FILE: Path = DATA_DIR / "trusted_devices.json"
-PID_FILE: Path = Path("/tmp/archer_monitor.pid")
+PID_FILE: Path = Path("/tmp/wifitracker_monitor.pid")
 
 SCAN_INTERVAL: int = int(os.getenv("SCAN_INTERVAL", "30"))
 

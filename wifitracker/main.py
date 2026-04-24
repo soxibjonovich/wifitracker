@@ -46,6 +46,9 @@ def setup(
 def list_devices(
     only_active: bool = typer.Option(False, help="filter only active devices"),
 ):
+    if not is_setup_done():
+        console.print("[red]Run 'wifitracker setup' first.[/red]")
+        raise typer.Exit(1)
     devices = get_connected_devices(only_active)
     trusted = get_trusted()
     blocked = get_blocked()
@@ -57,13 +60,14 @@ def list_devices(
     table.add_column("Band")
     table.add_column("Status")
     for d in devices:
-        if d.mac in blocked:
+        mac = d.mac.upper().replace("-", ":").replace(".", ":")
+        if mac in blocked:
             status = "[red]BLOCKED[/red]"
-        elif d.mac in trusted:
+        elif mac in trusted:
             status = "[green]trusted[/green]"
         else:
             status = "[yellow]unknown[/yellow]"
-        table.add_row(d.hostname, d.mac, d.ip, d.connection, status)
+        table.add_row(d.hostname, mac, d.ip, d.connection, status)
 
     console.print(table)
 

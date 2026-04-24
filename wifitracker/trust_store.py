@@ -6,7 +6,6 @@ from wifitracker.config import BLOCKED_FILE, TRUSTED_FILE, DATA_DIR
 
 
 def _load(path: Path) -> dict:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
     if not path.exists():
         return {}
     return json.loads(path.read_text())
