@@ -1,12 +1,7 @@
+import json
+
 import pytest
 from wifitracker import trust_store
-
-
-@pytest.fixture(autouse=True)
-def tmp_store(tmp_path, monkeypatch):
-    monkeypatch.setattr("wifitracker.trust_store.TRUSTED_FILE", tmp_path / "trusted.json")
-    monkeypatch.setattr("wifitracker.trust_store.BLOCKED_FILE", tmp_path / "blocked.json")
-    monkeypatch.setattr("wifitracker.trust_store.DATA_DIR", tmp_path)
 
 
 def test_add_and_is_trusted():
@@ -34,3 +29,23 @@ def test_remove_blocked():
     trust_store.add_blocked("FF:EE:DD:CC:BB:AA")
     assert trust_store.remove_blocked("FF:EE:DD:CC:BB:AA") is True
     assert trust_store.is_blocked("FF:EE:DD:CC:BB:AA") is False
+
+
+@pytest.mark.parametrize("raw", ["aa-bb-cc-dd-ee-ff", "AA:BB:CC:DD:EE:FF", "aabb.ccdd.eeff", "AABBCCDDEEFF"])
+def test_normalize_mac_formats(raw):
+    assert trust_store.normalize_mac(raw) == "AA:BB:CC:DD:EE:FF"
+
+
+def test_normalize_mac_rejects_garbage():
+    with pytest.raises(ValueError):
+        trust_store.normalize_mac("not-a-mac")
+
+
+def test_dash_and_colon_macs_match():
+    trust_store.add_trusted("aa-bb-cc-dd-ee-ff")
+    assert trust_store.is_trusted("AA:BB:CC:DD:EE:FF") is True
+
+
+def test_old_files_with_dash_keys_still_match(tmp_data_dir):
+    (tmp_data_dir / "blocked.json").write_text(json.dumps({"AA-BB-CC-DD-EE-FF": {"reason": "old"}}))
+    assert trust_store.is_blocked("aa:bb:cc:dd:ee:ff") is True

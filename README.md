@@ -13,7 +13,8 @@ A CLI tool for managing your TP-Link Wifi routers — monitor connected devices,
 ## Features
 
 - 📋 List all connected devices with status (trusted / unknown / blocked)
-- ✅ Trust or block devices by MAC address
+- ✅ Trust devices, block / unblock them on the router (Archer C24 / C80)
+- ⏳ Daily online-time limit per device — blocked after N hours, unblocked next day
 - ⏱ See how long each device has been online
 - 🔍 Filter only active devices
 - 🤖 Background monitor daemon — alerts on unknown devices
@@ -28,8 +29,10 @@ A CLI tool for managing your TP-Link Wifi routers — monitor connected devices,
 ### 1. Install dependencies
 
 ```bash
-pip install tplinkrouterc6u typer rich
+uv sync
 ```
+
+Blocking needs `block_device` from the [TP-Link-Archer-C6U fork](https://github.com/soxibjonovich/TP-Link-Archer-C6U); `pyproject.toml` installs it from there.
 
 ### 2. Configure router credentials
 
@@ -65,7 +68,27 @@ python -m wifitracker devices block AA:BB:CC:DD:EE:FF
 
 # Unblock a device
 python -m wifitracker devices unblock AA:BB:CC:DD:EE:FF
+
+# Show what the router has blocked
+python -m wifitracker devices blocked
 ```
+
+Block / unblock change the router's Access Control blacklist (Archer C24 / C80). Other routers print a "cannot block devices" error.
+
+### Daily limits
+
+```bash
+# Allow a device 2.5 hours online per day
+python -m wifitracker devices limit AA:BB:CC:DD:EE:FF 2.5 --name "Kid tablet"
+
+# Show limits and today's online time
+python -m wifitracker devices limits
+
+# Remove the limit (the monitor unblocks it on its next scan)
+python -m wifitracker devices unlimit AA:BB:CC:DD:EE:FF
+```
+
+Online time is counted by the monitor, so `monitor start` has to be running. Every scan adds the time since the previous scan to each active device with a limit. When a device uses up its hours it is blocked on the router; at midnight the count resets and it is unblocked. A device you blocked by hand stays blocked.
 
 ### Monitor
 
@@ -109,10 +132,13 @@ wifitracker/
 │   ├── config.py        ← settings and setup file loader
 │   ├── router.py        ← tplinkrouterc6u wrapper
 │   ├── trust_store.py   ← JSON persistence for trusted/blocked devices
+│   ├── limits.py        ← daily online-time limits and usage
 │   ├── monitor.py       ← background daemon
 │   ├── notifier.py      ← terminal alerts
 │   └── main.py          ← Typer CLI entry point
 └── tests/
+    ├── test_cli.py
+    ├── test_limits.py
     ├── test_router.py
     ├── test_trust_store.py
     └── test_monitor.py
@@ -123,7 +149,7 @@ wifitracker/
 ## Running Tests
 
 ```bash
-pytest tests/ -v
+uv run pytest
 ```
 
 ---
